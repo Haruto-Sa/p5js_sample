@@ -1,16 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/addons/p5.sound.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
-
-  </head>
-  <body>
-    <main>
-    </main>
-    <script src="sketch.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/addons/p5.sound.min.js"></script>
+</head>
+<body>
+  <div id="home-screen" class="overlay">
+    <h1>Welcome to Tetris</h1>
+    <button id="start-button">Start Game</button>
+  </div>
+  <div id="main-game" class="hidden">
+    <div class="container">
+      <div class="info-container">
+        <div id="hold">
+          <h2>Hold</h2>
+          <div id="hold-piece"></div>
+        </div>
+        <div id="score">
+          <h2>Score</h2>
+          <div id="score-value">0</div>
+          <h2>High Score</h2>
+          <div id="high-score-value">0</div>
+        </div>
+      </div>
+      <div class="game-container">
+        <div id="game"></div>
+      </div>
+    </div>
+    <div id="game-over" class="overlay hidden">
+      <h1>Game Over</h1>
+      <button id="retry-button">Retry</button>
+      <button id="home-button">Home</button>
+    </div>
+  </div>
+  <script src="sketch.js"></script>
+</body>
 </html>
-あ
