@@ -15,26 +15,70 @@ let speedIncreaseInterval = 30000; // 30 seconds
 let lastSpeedIncreaseTime = 0;
 let gameOver = false;
 let hiddenRows = 1;
+let backgroundMusic;
+let landSound;
+let clearSound;
+let gameOverSound;
+let fft;
+let isMuted = false;
+
+function preload() {
+  backgroundMusic = loadSound('background.wav');
+  landSound = loadSound('land.wav');
+  clearSound = loadSound('clear.wav');
+  gameOverSound = loadSound('gameover.wav');
+}
 
 function setup() {
   let canvas = createCanvas(cols * gridSize, visibleRows * gridSize);
+  fft = new p5.FFT();
   canvas.parent('game');
   board = createBoard(rows + hiddenRows, cols);
   currentPiece = new Piece();
   nextPiece = new Piece();
   frameRate(60);
+  backgroundMusic.loop();
   lastSpeedIncreaseTime = millis();
   loadHighScore();
   updateScore();
   document.getElementById('start-button').addEventListener('click', startGame);
   document.getElementById('retry-button').addEventListener('click', retryGame);
   document.getElementById('home-button').addEventListener('click', goToHome);
+  let muteButton = document.getElementById('mute-button');
+  muteButton.addEventListener('click', toggleMute);
+}
+
+function toggleMute() {
+  isMuted = !isMuted;
+  if (isMuted) {
+    backgroundMusic.stop();
+    document.getElementById('mute-button').innerText = 'Unmute Music';
+  } else {
+    backgroundMusic.loop();
+    document.getElementById('mute-button').innerText = 'Mute Music';
+  }
 }
 
 function draw() {
   if (gameOver) return;
 
   background(50);
+
+  // Spectrum visualizer
+  let spectrum = fft.analyze();
+  push();
+  fill(100, 255, 100, 100); // Semi-transparent green
+  noStroke();
+  let barWidth = width / spectrum.length;
+  for (let i = 0; i < spectrum.length; i++) {
+    let amp = spectrum[i]; // Amplitude (0-255)
+    let h = map(amp, 0, 255, 0, height / 4); // Map to bottom quarter of canvas height
+    let x = i * barWidth;
+    let y = height - h; // Draw from bottom up
+    rect(x, y, barWidth, h);
+  }
+  pop();
+
   drawBoard();
   drawPiece(currentPiece);
   displayHold();
@@ -177,11 +221,12 @@ function moveDown() {
   if (collision()) {
     currentPiece.y--;
     mergePiece();
-    clearLines();
+  // clearLines() is called in mergePiece after landing sound
     currentPiece = nextPiece;
     nextPiece = new Piece();
     holdUsed = false;
     if (collision()) {
+    gameOverSound.play();
       gameOver = true;
       saveHighScore();
       document.getElementById('game-over').classList.remove('hidden');
@@ -240,9 +285,12 @@ function mergePiece() {
       }
     }
   }
+  landSound.play();
+  clearLines();
 }
 
 function clearLines() {
+  let lineClearedThisTurn = false;
   for (let row = hiddenRows; row < rows + hiddenRows; row++) {
     let isFull = true;
     for (let col = 0; col < cols; col++) {
@@ -255,8 +303,12 @@ function clearLines() {
       board.splice(row, 1);
       board.unshift(new Array(cols).fill(0));
       score += 100;
+      lineClearedThisTurn = true;
       updateScore();
     }
+  }
+  if (lineClearedThisTurn) {
+    clearSound.play();
   }
 }
 
